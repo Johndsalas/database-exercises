@@ -14,7 +14,7 @@ show create table departments;
 
 show create table employees;
 -- both use varchar variables
-
+-- Linked through data link through a differint table
 show create table dept_manager; 
 /* 10)CREATE TABLE `dept_manager` (
   `emp_no` int(11) NOT NULL,
