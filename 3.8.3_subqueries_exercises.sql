@@ -67,7 +67,19 @@ WHERE to_date > NOW() AND salary > (SELECT MAX(salary) - STDDEV(salary)
 
 -- Find all the department names that currently have female managers.
 
+select dept_name
 
+from departments
+
+where dept_no in (	select dept_no 
+					from dept_manager
+					where emp_no in (select emp_no
+									 from employees
+									 where gender = "F")
+					
+					
+					
+						);
 
 -- Find the first and last name of the employee with the highest salary.
 
