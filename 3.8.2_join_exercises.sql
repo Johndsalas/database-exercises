@@ -216,18 +216,15 @@ and cde.to_date > now()
 join departments as d
 on d.dept_no = cde.dept_no
 
-join 
-(select concat(e.first_name, ' ', e.last_name) as dept_mgr, d.dept_no, d.dept_name
+join (	select concat(e.first_name, ' ', e.last_name) as dept_mgr, d.dept_no, d.dept_name
+	  	from employees as e
+		join dept_manager dm
+		on  e.emp_no = dm.emp_no
+		and dm.to_date > now()
 
-from employees as e
-
-join dept_manager dm
-on  e.emp_no = dm.emp_no
-and dm.to_date > now()
-
-join departments as d
-on dm.dept_no = d.dept_no
-) as mn
+		join departments as d
+		on dm.dept_no = d.dept_no
+									) as mn
 
 on d.dept_no = mn.dept_no
 
@@ -235,3 +232,49 @@ order by e.last_name, e.first_name;
 
 
 -- Bonus Find the highest paid employee in each department.
+
+SELECT e.first_name, e.last_name, d.dept_name, max_sal.max_salary
+
+FROM employees AS e
+
+JOIN dept_emp AS de 
+ON (e.emp_no=de.emp_no)
+
+JOIN departments AS d 
+ON(d.dept_no=de.dept_no)
+
+JOIN salaries AS s 
+ON (s.emp_no=e.emp_no) AND s.to_date='9999-01-01'
+
+JOIN(
+	
+	SELECT d.dept_name, MAX(s.salary) as max_salary
+	FROM departments as d
+	
+	JOIN dept_emp AS de 
+	ON (d.dept_no=de.dept_no)
+	
+	JOIN employees AS e 
+	ON (de.emp_no=e.emp_no)
+
+	JOIN salaries AS s 
+	ON (e.emp_no=s.emp_no)
+	
+	WHERE de.to_date='9999-01-01' AND s.to_date='9999-01-01'
+	
+	GROUP BY d.dept_name
+	
+	) AS max_sal 
+ON max_sal.dept_name=d.dept_name AND max_sal.max_salary=s.salary
+	
+	
+	
+WHERE de.to_date='9999-01-01' AND s.to_date='9999-01-01';
+
+
+
+
+
+
+
+
