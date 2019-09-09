@@ -52,3 +52,49 @@ set cent_amount = amount * 100;
 select * from sakila_payment;
 
 -- Find out how the average pay in each department compares to the overall average pay. In order to make the comparison easier, you should use the Z-score for salaries. In terms of salary, what is the best department to work for? The worst?
+
+use employees;
+
+SELECT a.dept_name, AVG(a.salary_z_score)
+
+FROM(
+		SELECT d.dept_name, (s.salary-a.average_salary)/(a.salary_stdev) AS salary_z_score
+		FROM dept_emp AS de
+		
+		JOIN departments AS d 
+		ON (de.dept_no=d.dept_no) AND de.to_date='9999-01-01'
+
+		JOIN salaries as s 
+		ON (de.emp_no=s.emp_no) AND s.to_date='9999-01-01'
+
+		JOIN (
+				SELECT d.dept_name, AVG(s.salary) AS average_salary, STDDEV(s.salary) AS salary_stdev
+		
+				FROM departments as d
+		
+				JOIN dept_emp AS de 
+				ON (d.dept_no=de.dept_no)
+
+				JOIN employees AS e 
+				ON (de.emp_no=e.emp_no)
+
+				JOIN salaries AS s 
+				ON (e.emp_no=s.emp_no)
+
+				WHERE de.to_date='9999-01-01' AND s.to_date='9999-01-01'
+
+				GROUP BY d.dept_name
+				
+			  ) AS a 
+				ON (a.dept_name=d.dept_name)
+		
+	) AS a
+
+GROUP BY a.dept_name;
+
+-- What is the average salary for an employee based on the number of years they have been with the company? Express your answer in terms of the Z-score of salary.
+-- Since this data is a little older, scale the years of experience by subtracting the minumum from every row.
+
+
+
+
