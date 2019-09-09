@@ -92,8 +92,25 @@ FROM(
 
 GROUP BY a.dept_name;
 
--- What is the average salary for an employee based on the number of years they have been with the company? Express your answer in terms of the Z-score of salary.
--- Since this data is a little older, scale the years of experience by subtracting the minumum from every row.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
