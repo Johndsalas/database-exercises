@@ -318,6 +318,65 @@ order by sum(p.amount) desc
 
 limit 5;
 
+-- SELECT statements
+-- Select all columns from the actor table.
+
+select * from actor;
+
+-- Select only the last_name column from the actor table.
+
+select last_name from actor;
+
+-- Select only the following columns from the film table.
+
+select title, description from film;
+
+-- DISTINCT operator
+-- Select all distinct (different) last names from the actor table.
+
+select distinct last_name from actor;
+	
+-- Select all distinct (different) postal codes from the address table.
+
+select distinct postal_code from address;
+
+-- Select all distinct (different) ratings from the film table.
+
+select distinct rating from film;
+
+-- WHERE clause
+-- Select the title, description, rating, movie length columns from the films table that last 3 hours or longer.
+
+select title, description, rating, length
+from film
+where length/60 > 3;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
