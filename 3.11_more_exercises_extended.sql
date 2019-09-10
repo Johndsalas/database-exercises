@@ -140,26 +140,266 @@ limit 20;
 
 -- Select the title, description, special features, length, and rental duration columns from the film table for the first 10 films with behind the scenes footage, under 2 hours in length, and a     rental duration between 5 and 7 days, ordered by length in descending order.
 
-Select title, description, special_features, length, rental_duration
-from film
-where special_features like "%behind the scenes"; 
+USE sakila;
+
+SELECT title, description, special_features, length, rental_duration
+
+FROM film
+	
+WHERE length < 120
+		AND rental_duration BETWEEN 5 AND 7
+		AND special_features LIKE '%Behind the Scenes%' 
+		
+ORDER BY length DESC
+LIMIT 10;
+
+-- JOINs
+-- Select customer first_name/last_name and actor first_name/last_name columns from performing a left join between the customer and actor column on the last_name column in each table. (i.e. -- customer.last_name = actor.last_name)
+
+USE sakila;
+SELECT
+		c.first_name cust_first_name,c.last_name cust_last_name,a.first_name actor_first_name,a.last_name actor_last_name
+FROM
+		customer c
+LEFT JOIN
+		actor a
+		using(last_name);
 
 
+-- Label customer first_name/last_name columns as customer_first_name/customer_last_name
+-- Label actor first_name/last_name columns in a similar fashion.
+-- returns correct number of records: 599
+	
+USE sakila;
+	SELECT
+		c.first_name cust_first_name
+		,c.last_name cust_last_name
+		,a.first_name actor_first_name
+		,a.last_name actor_last_name
+	FROM
+		customer c
+	LEFT JOIN
+		actor a
+		using(last_name);
 
+-- Select the customer first_name/last_name and actor first_name/last_name columns from performing a /right join between the customer and actor column on the last_name column in each table. (i.e. -- customer.last_name = actor.last_name)
+-- returns correct number of records: 200
 
+	USE sakila;
+	SELECT
+		c.first_name cust_first_name
+		,c.last_name cust_last_name
+		,a.first_name actor_first_name
+		,a.last_name actor_last_name
+	FROM
+		customer c
+	RIGHT JOIN
+		actor a
+		using(last_name);
+		
+-- Select the customer first_name/last_name and actor first_name/last_name columns from performing an inner join between the customer and actor column on the last_name column in each table. (i.e. -- customer.last_name = actor.last_name)
+-- returns correct number of records: 43
+	
+	USE sakila;
+	SELECT
+		c.first_name cust_first_name
+		,c.last_name cust_last_name
+		,a.first_name actor_first_name
+		,a.last_name actor_last_name
+	FROM
+		customer c
+	JOIN
+		actor a
+		using(last_name);
 
+-- Select the city name and country name columns from the city table, performing a left join with the country table to get the country name column.
+-- Returns correct records: 600
+	
+	USE sakila;
+	SELECT
+		cty.city
+		,ctry.country
+		
+	FROM
+		city cty
+	LEFT JOIN
+		country ctry
+		USING (country_id);
+		
+-- Select the title, description, release year, and language name columns from the film table, performing a left join with the language table to get the "language" column.
+-- Label the language.name column as "language"
+-- Returns 1000 rows
+	
+	USE sakila;
+	
+	SELECT
+		f.title
+		,f.description
+		,f.release_year
+		,l.name language
+	FROM
+		film f
+	JOIN
+		language l
+		USING(language_id);
 
+-- Select the first_name, last_name, address, address2, city name, district, and postal code columns from the staff table, performing 2 left joins with the address table then the city table to get the address and city related columns.
+-- returns correct number of rows: 2
+	
+	USE sakila;
+	SELECT
+		st.first_name
+		,st.last_name
+		,a.address
+		,a.address2
+		,cty.city
+		,a.district
+		,a.postal_code
+	FROM
+		staff st
+	LEFT JOIN
+		address a
+		USING(address_id)
+	LEFT JOIN
+		city cty
+		USING(city_id);
 
+-- What is the average replacement cost of a film? 
 
+USE sakila;
+	SELECT
+		AVG(replacement_cost)
+	FROM
+		film;
 
+-- Does this change depending on the rating of the film?
 
+USE sakila;
+	SELECT
+		rating
+		,AVG(replacement_cost)
+	FROM
+		film
+	GROUP BY
+		rating;
 
+-- How many different films of each genre are in the database?
 
+USE sakila;
+	SELECT
+		cat.name genre
+		,count(*) films
+	FROM
+		film_category fc
+	JOIN
+		category cat
+		USING(category_id)
+	GROUP BY cat.name
 
+-- What are the 5 frequently rented films?
 
+USE sakila;
+	SELECT
+		f.title
+		,count(*) rentals
+	FROM
+		film f
+	JOIN
+		inventory i
+		USING(film_id)
+	JOIN
+		rental r
+		USING(inventory_id)
+	GROUP BY
+		f.title
+	ORDER BY
+		rentals DESC
+	LIMIT 5;
+	
+-- What are the most most profitable films (in terms of gross revenue)?	
+	
+SELECT
+		f.title
+		,SUM(p.amount) revenues
+	FROM
+		film f
+	JOIN
+		inventory i
+		USING(film_id)
+	JOIN
+		rental r
+		USING(inventory_id)
+	JOIN
+		payment p
+		USING(rental_id)
+	GROUP BY
+		f.title
+	ORDER BY
+		revenues DESC
+	LIMIT 5;	
+	
+-- Who is the best customer?
 
+SELECT
+		CONCAT(cust.last_name,', ',cust.first_name) cust_name
+		,SUM(p.amount) revenues
+	FROM
+		customer cust
+	JOIN
+		rental r
+		USING(customer_id)
+	JOIN
+		payment p
+		USING(rental_id)
+	GROUP BY
+		CONCAT(cust.last_name,', ',cust.first_name)
+	ORDER BY
+		revenues DESC
+	LIMIT 1;
 
+-- Who are the most popular actors (that have appeared in the most films)?
 
+SELECT
+		CONCAT(a.last_name,', ',a.first_name) actor_name
+		,COUNT(*) movies
+	FROM
+		film_actor fa
+	JOIN
+		(SELECT DISTINCT 
+			actor_id
+			,first_name
+			,last_name
+		FROM
+			actor
+		) a
+		USING(actor_id)
+	GROUP BY
+		CONCAT(a.last_name,', ',a.first_name) 
+		,a.actor_id
+	ORDER BY
+		movies DESC
+	LIMIT 5;
 
+-- What are the sales for each store for each month in 2005?
 
-
+USE sakila;
+	SELECT 
+		SUBSTR(p.payment_date,1,7) yrmo
+		,s.store_id
+		,SUM(p.amount) Sales
+	FROM
+		store s
+	JOIN
+		staff st
+		USING(store_id)
+	JOIN
+		rental r
+		USING(staff_id)
+	JOIN
+		payment p
+		USING(rental_id)
+	WHERE
+		p.payment_date LIKE '2005%'
+	GROUP BY 
+		SUBSTR(p.payment_date,1,7)
+		,s.store_id;
